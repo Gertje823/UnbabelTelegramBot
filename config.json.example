@@ -1,0 +1,10 @@
+{
+    "TELEGRAM": {
+        "API_KEY": "api:key",
+        "CHAT_ID": "telegram_user_id"
+    },
+    "UNBABEL": {
+        "USERNAME": "unbabel_user_name",
+        "SESSIONID": "unbabel_session_id"
+    }
+}
