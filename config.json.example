@@ -6,5 +6,8 @@
     "UNBABEL": {
         "USERNAME": "unbabel_user_name",
         "SESSIONID": "unbabel_session_id"
-    }
+    },
+	"PREFERENCES": {
+		"MINIMUM": "0"
+	}
 }
