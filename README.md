@@ -7,5 +7,5 @@ A telegram bot for Unbabel.
 /tasks - Check for paid tasks
 /pending - Show total amount pending
 /balance - Show account balance
-/set_minimum x - Send notifications only when available tasks > x
+/set_minimum x - Only send notifications when available tasks > x
  ```
