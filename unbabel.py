@@ -21,7 +21,6 @@ cookies = {'sessionid': sessionid}
 
 old_tasks = 0
 
-
 updater = Updater(token=api_key)
 dispatcher = updater.dispatcher
 
@@ -91,37 +90,28 @@ def get_tasks(bot, update):
                 bot.send_message(chat_id=update.message.chat_id,
                                  text=msg)
 
-def set_minimum(bot, update):
-    msg = update.message.text
-    if msg == '/set_minimum':
-        text = f'Please type a number after the command'
-        turl = f'https://api.telegram.org/bot{api_key}/sendMessage?chat_id={chat_id}&text={text}'
-        requests.get(turl)
+
+def set_minimum(bot, update, args):
+    if not args:
+        bot.send_message(chat_id=update.message.chat_id, text='Please type a number after the command')
     else:
         global minimum
-        minimum = msg.replace('/set_minimum ', '')
         try:
-            minimum = int(minimum)
+            minimum = int(args[0])
             config['PREFERENCES']['MINIMUM'] = minimum
             with open("config.json", "w") as jsonFile:
-                json.dump(config, jsonFile)
+                json.dump(config, jsonFile, indent=4)
 
             print(str(datetime.now()), f'minimum set to {minimum}')
-            text = f'You get a notification if there are more than {minimum} tasks'
-            turl = f'https://api.telegram.org/bot{api_key}/sendMessage?chat_id={chat_id}&text={text}'
-            requests.get(turl)      
-        except ValueError:
-            print(error)
-            text = f'Please type a number after the command'
-            turl = f'https://api.telegram.org/bot{api_key}/sendMessage?chat_id={chat_id}&text={text}'
+            bot.send_message(chat_id=update.message.chat_id, text=f'You\'ll get a notification if there are more than {minimum} tasks')
             requests.get(turl)
-        
-        
-
+        except ValueError:
+            bot.send_message(chat_id=update.message.chat_id, text='Please type a number after the command')
+            requests.get(turl)
 
 
 dispatcher.add_handler(CommandHandler('tasks', get_tasks))
-dispatcher.add_handler(CommandHandler('set_minimum', set_minimum))
+dispatcher.add_handler(CommandHandler('set_minimum', set_minimum, pass_args=True))
 dispatcher.add_handler(CommandHandler('balance', get_balance))
 dispatcher.add_handler(CommandHandler('pending', get_pending))
 dispatcher.add_handler(CommandHandler('total_earned', get_total_earned))
@@ -150,6 +140,7 @@ while True:
                     requests.get(turl)
                 else:
                     print(str(datetime.now()), f'There are {task} tasks available but it is not more than {minimum}')
-            else: print(str(datetime.now()), f'Tasks available: {task}, from {source_lang} to {target_lang}')
+            else:
+                print(str(datetime.now()), f'Tasks available: {task}, from {source_lang} to {target_lang}')
             old_tasks = task
     time.sleep(600)
