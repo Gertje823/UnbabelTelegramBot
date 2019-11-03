@@ -8,6 +8,7 @@
         "SESSIONID": "unbabel_session_id"
     },
 	"PREFERENCES": {
-		"MINIMUM": "0"
+		"MINIMUM": 0,
+		"NOTIFICATIONS": true
 	}
 }
