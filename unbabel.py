@@ -26,6 +26,7 @@ updater = Updater(token=api_key)
 dispatcher = updater.dispatcher
 
 
+# get current Unbabel account balance
 def get_balance(bot, update):
     url = f'https://unbabel.com/api/v1/user/{username}'
     r = requests.get(url, cookies=cookies)
@@ -36,6 +37,7 @@ def get_balance(bot, update):
                      text=msg)
 
 
+# get pending cash out money
 def get_pending(bot, update):
     url = f'https://unbabel.com/api/v1/user/{username}'
     r = requests.get(url, cookies=cookies)
@@ -61,11 +63,10 @@ def get_total_earned(bot, update):
     total_income = data['total_income']
     tasks_done = data['tasks_done']
     msg = f'Total earned: ${total_income} \nTotal tasks done: {tasks_done}'
-    bot.send_message(chat_id=update.message.chat_id,
-                     text=msg)
+    bot.send_message(chat_id=update.message.chat_id, text=msg)
 
 
-# get tasks
+# get current amount of available tasks
 def get_tasks(bot, update):
     url = 'https://unbabel.com/api/v1/available_tasks'
     r = requests.get(url, cookies=cookies)
@@ -88,10 +89,10 @@ def get_tasks(bot, update):
                 print(str(datetime.now()), 'Tasks available:', task, 'from', source_lang, 'to', target_lang, '\n')
                 # send telegram msg
                 msg = f'Tasks available: {task}, from  {source_lang} to {target_lang} \nHourly rate: ${hourly_rate}'
-                bot.send_message(chat_id=update.message.chat_id,
-                                 text=msg)
+                bot.send_message(chat_id=update.message.chat_id, text=msg)
 
 
+# allow user to set minimum number of tasks before a notification will be send
 def set_minimum(bot, update, args):
     if not args:
         bot.send_message(chat_id=update.message.chat_id, text='Please type a number after the command')
@@ -110,9 +111,10 @@ def set_minimum(bot, update, args):
             bot.send_message(chat_id=update.message.chat_id, text='Please type a number after the command')
 
 
+# allow user to toggle notifications on or off
 def toggle_notifications(bot, update, args):
     global notifications
-    if not args:
+    if not args:  # if user did not specify arguments
         bot.send_message(chat_id=update.message.chat_id, parse_mode='markdown', text='Usage: `/notifications on | off`')
     else:
         if args[0] == 'on':
