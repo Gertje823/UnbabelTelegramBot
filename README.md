@@ -1,5 +1,5 @@
 # UnbabelTelegramBot
-A telegram bot for Unbabel.
+A telegram bot for Unbabel. 
 
 ## Commands
  ```
@@ -8,4 +8,5 @@ A telegram bot for Unbabel.
 /pending - Show total amount pending
 /balance - Show account balance
 /set_minimum x - Only send notifications when available tasks > x
+/noticications on/off -  toggle notifications on or off
  ```
