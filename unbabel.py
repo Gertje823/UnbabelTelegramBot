@@ -6,6 +6,7 @@ from datetime import datetime
 import json
 
 # load config.json
+
 with open('config.json', 'r') as f:
     config = json.load(f)
 
@@ -70,26 +71,30 @@ def get_total_earned(bot, update):
 def get_tasks(bot, update):
     url = 'https://unbabel.com/api/v1/available_tasks'
     r = requests.get(url, cookies=cookies)
-    data = r.json()
-    paid = data['paid']
-    if not paid:
-        bot.send_message(chat_id=update.message.chat_id,
-                         text='You\'re not able to do paid tasks')
+    if r.status_code == 401:
+        print(str(datetime.now()), 'Sessionid is not valid')
+        bot.send_message(chat_id=update.message.chat_id, text='Your sessionid is not valid. Please update your sessionid with /sessionid {yoursessionid}')
     else:
-        for tasks in paid:
-            task = tasks['tasks_available']
-            if 0 is task:
-                bot.send_message(chat_id=update.message.chat_id, text='No tasks')
-            else:
-                source_lang = tasks['language_pair']['source_language']['name']
-                target_lang = tasks['language_pair']['target_language']['name']
-                hourly_rate = tasks['language_pair']['hourly_rate']
-                hourly_rate = round(hourly_rate / 100, 2)
+        data = r.json()
+        paid = data['paid']
+        if not paid:
+            bot.send_message(chat_id=update.message.chat_id,
+                             text='You\'re not able to do paid tasks')
+        else:
+            for tasks in paid:
+                task = tasks['tasks_available']
+                if 0 is task:
+                    bot.send_message(chat_id=update.message.chat_id, text='No tasks')
+                else:
+                    source_lang = tasks['language_pair']['source_language']['name']
+                    target_lang = tasks['language_pair']['target_language']['name']
+                    hourly_rate = tasks['language_pair']['hourly_rate']
+                    hourly_rate = round(hourly_rate / 100, 2)
 
-                print(str(datetime.now()), 'Tasks available:', task, 'from', source_lang, 'to', target_lang, '\n')
-                # send telegram msg
-                msg = f'Tasks available: {task}, from  {source_lang} to {target_lang} \nHourly rate: ${hourly_rate}'
-                bot.send_message(chat_id=update.message.chat_id, text=msg)
+                    print(str(datetime.now()), 'Tasks available:', task, 'from', source_lang, 'to', target_lang, '\n')
+                    # send telegram msg
+                    msg = f'Tasks available: {task}, from  {source_lang} to {target_lang} \nHourly rate: ${hourly_rate}'
+                    bot.send_message(chat_id=update.message.chat_id, text=msg)
 
 
 # allow user to set minimum number of tasks before a notification will be send
@@ -137,7 +142,6 @@ def toggle_notifications(bot, update, args):
         with open('config.json', 'w') as f:
             json.dump(config, f, indent=4)
 
-<<<<<<< HEAD
 # allow user to update sessionid
 def set_sessionid(bot, update, args):
     if not args:
@@ -168,8 +172,6 @@ def reload_config():
     cookies = {'sessionid': sessionid}
     print(str(datetime.now()), 'Reloaded config.json')
 
-=======
->>>>>>> parent of 7e11d9c... Mogelijkheid toegevoegd om de sessionid te updaten in Telegram.
 
 dispatcher.add_handler(CommandHandler('tasks', get_tasks))
 dispatcher.add_handler(CommandHandler('set_minimum', set_minimum, pass_args=True))
@@ -177,6 +179,7 @@ dispatcher.add_handler(CommandHandler('balance', get_balance))
 dispatcher.add_handler(CommandHandler('pending', get_pending))
 dispatcher.add_handler(CommandHandler('total_earned', get_total_earned))
 dispatcher.add_handler(CommandHandler('notifications', toggle_notifications, pass_args=True))
+dispatcher.add_handler(CommandHandler('sessionid', set_sessionid, pass_args=True))
 updater.start_polling(clean=True)
 
 while True:
@@ -184,29 +187,36 @@ while True:
         url = 'https://unbabel.com/api/v1/available_tasks'
         r = requests.get(url, cookies=cookies)
         data = r.json()
-        paid = data['paid']
-        if not paid:
-            print(str(datetime.now()), 'Not allowed to do paid tasks')
+        if r.status_code == 401:
+            print(str(datetime.now()), 'Sessionid is not valid' )
+            msg = 'Your sessionid is not valid. Please update your sessionid with /sessionid {yoursessionid}'
+            turl = f'https://api.telegram.org/bot{api_key}/sendMessage?chat_id={chat_id}&text={msg}'
+            requests.get(turl)
+            time.sleep(600)
         else:
-            for tasks in paid:
-                task = tasks['tasks_available']
-                source_lang = tasks['language_pair']['source_language']['name']
-                target_lang = tasks['language_pair']['target_language']['name']
-                hourly_rate = tasks['language_pair']['hourly_rate']
-                hourly_rate = round(hourly_rate / 100, 2)
-                if old_tasks < task:
-                    if int(minimum) < task:
-                        print(str(datetime.now()), f'Tasks available: {task}, from {source_lang} to {target_lang}\n')
-                        # send telegram msg
-                        msg = f'Tasks available: {task}, from {source_lang} to {target_lang} \nHourly rate: ${hourly_rate}'
-                        turl = f'https://api.telegram.org/bot{api_key}/sendMessage?chat_id={chat_id}&text={msg}'
-                        requests.get(turl)
+            paid = data['paid']
+            if not paid:
+                print(str(datetime.now()), 'Not allowed to do paid tasks')
+            else:
+                for tasks in paid:
+                    task = tasks['tasks_available']
+                    source_lang = tasks['language_pair']['source_language']['name']
+                    target_lang = tasks['language_pair']['target_language']['name']
+                    hourly_rate = tasks['language_pair']['hourly_rate']
+                    hourly_rate = round(hourly_rate / 100, 2)
+                    if old_tasks < task:
+                        if int(minimum) < task:
+                            print(str(datetime.now()), f'Tasks available: {task}, from {source_lang} to {target_lang}\n')
+                            # send telegram msg
+                            msg = f'Tasks available: {task}, from {source_lang} to {target_lang} \nHourly rate: ${hourly_rate}'
+                            turl = f'https://api.telegram.org/bot{api_key}/sendMessage?chat_id={chat_id}&text={msg}'
+                            requests.get(turl)
+                        else:
+                            print(str(datetime.now()),
+                                  f'There are {task} tasks available but it is not more than {minimum}')
                     else:
-                        print(str(datetime.now()),
-                              f'There are {task} tasks available but it is not more than {minimum}')
-                else:
-                    print(str(datetime.now()), f'Tasks available: {task}, from {source_lang} to {target_lang}')
-                old_tasks = task
-        time.sleep(600)
+                        print(str(datetime.now()), f'Tasks available: {task}, from {source_lang} to {target_lang}')
+                    old_tasks = task
+            time.sleep(600)
     else:
         time.sleep(60)
