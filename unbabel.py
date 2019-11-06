@@ -145,7 +145,8 @@ def toggle_notifications(bot, update, args):
 # allow user to update sessionid
 def set_sessionid(bot, update, args):
     if not args:
-        bot.send_message(chat_id=update.message.chat_id, text='Please put your sessionid after /sessionid')
+        bot.send_message(chat_id=update.message.chat_id, parse_mode='markdown',
+                             text='Usage: `/sessionid {your-sessionid}`')
     else:
         global sessionid
         sessionid = args[0]
