@@ -69,6 +69,7 @@ def get_total_earned(bot, update):
 
 # get current amount of available tasks
 def get_tasks(bot, update):
+    reload_config()
     url = 'https://unbabel.com/api/v1/available_tasks'
     r = requests.get(url, cookies=cookies)
     if r.status_code == 401:
@@ -184,6 +185,7 @@ updater.start_polling(clean=True)
 
 while True:
     if notifications:
+        reload_config()
         url = 'https://unbabel.com/api/v1/available_tasks'
         r = requests.get(url, cookies=cookies)
         data = r.json()
@@ -192,7 +194,7 @@ while True:
             msg = 'Your sessionid is not valid. Please update your sessionid with /sessionid {yoursessionid}'
             turl = f'https://api.telegram.org/bot{api_key}/sendMessage?chat_id={chat_id}&text={msg}'
             requests.get(turl)
-            time.sleep(600)
+            time.sleep(43200) #12 hours
         else:
             paid = data['paid']
             if not paid:
@@ -219,4 +221,4 @@ while True:
                     old_tasks = task
             time.sleep(600)
     else:
-        time.sleep(60)
+        time.sleep(600)
